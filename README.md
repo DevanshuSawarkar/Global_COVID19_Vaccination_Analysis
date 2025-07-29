@@ -58,7 +58,7 @@ This project focuses on analyzing global COVID-19 vaccination data using Explora
 ![Top 15 Countries by Full Vaccination Percentage](images/top_15_countries_by_full_vaccination_percentage.png "Top 15 Countries by Full Vaccination Percentage")
 
 - 
-    ## 4.1. Univariant Analysis
+    ## 4.1. Univariant Analysis Summary
 
     Univariate analysis looked at one feature at a time to understand the distributions:
 
@@ -75,7 +75,7 @@ This project focuses on analyzing global COVID-19 vaccination data using Explora
     - Smaller nations (e.g., Gibraltar, Falkland Islands) dominated in terms of per-hundred vaccination rates, showing high relative performance despite smaller population sizes.
 
 - 
-    ## 4.2. Multivariant Analysis
+    ## 4.2. Multivariant Analysis Summary
 
     Multivariate analysis explored relationships between multiple variables:
 
