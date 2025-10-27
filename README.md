@@ -1,4 +1,9 @@
-# Global COVID-19 Vaccination Analysis & Impact on Excess Mortality 💉📊 mortality_chart
+# Global COVID-19 Vaccination Analysis & Impact on Excess Mortality 💉
+
+- Author: Devanshu Sawarkar
+- Github Link: [https://github.com/DevanshuSawarkar/Global_COVID19_Vaccination_Analysis](https://github.com/DevanshuSawarkar/Global_COVID19_Vaccination_Analysis)
+
+---
 
 ## 1. Project Overview
 
