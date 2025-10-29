@@ -31,15 +31,14 @@ def load_analysis_data():
     This function contains all the cleaning, merging, and normalization logic.
     """
     try:
-        # --- 1. Load WHO Excess Deaths Data ---
-        # The file is a CSV, even though .xlsx is in its name. We use pd.read_csv.
-        deaths_file = "WHO_COVID_Excess_Deaths_Estimates_By_Countries.xlsx - Deaths by year, sex and age.csv"
-        try:
-            # Use pd.read_csv and try 'utf-8' encoding
-            deaths_df = pd.read_csv(deaths_file, skiprows=10, encoding='utf-8')
-        except UnicodeDecodeError:
-            # Fallback to 'latin1' encoding if 'utf-8' fails
-            deaths_df = pd.read_csv(deaths_file, skiprows=10, encoding='latin1')
+        ## --- 1. Load WHO Excess Deaths Data ---
+        # The file is a true .xlsx file, so we use pd.read_excel.
+        # This requires the 'openpyxl' library to be installed.
+        deaths_file = "WHO_COVID_Excess_Deaths_Estimates_By_Countries.xlsx"
+                
+        # Use pd.read_excel, which correctly handles .xlsx files.
+        # The outer try/except block in your function will catch any errors.
+        deaths_df = pd.read_excel(deaths_file, skiprows=10)
         
         deaths_df.rename(columns={'excess.mean*': 'excess_deaths'}, inplace=True)
         deaths_agg = deaths_df.groupby(['iso3', 'country', 'year'])['excess_deaths'].sum().reset_index()
@@ -86,7 +85,7 @@ def load_analysis_data():
         return final_df
     
     except FileNotFoundError as e:
-        st.error(f"Error: A required file was not found: {e.filename}. Make sure 'vaccinations.csv' and 'WHO_COVID_Excess_Deaths_Estimates_By_Countries.xlsx - Deaths by year, sex and age.csv' are in the same directory.")
+        st.error(f"Error: A required file was not found: {e.filename}. Make sure 'vaccinations.csv' and 'WHO_COVID_Excess_Deaths_Estimates_By_Countries.xlsx' are in the same directory.")
         return None
     except Exception as e:
         st.error(f"An unexpected error occurred during data loading: {e}")
