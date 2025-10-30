@@ -7,7 +7,13 @@
 
 ## 1. Project Overview
 
-This project provides a comprehensive analysis of global COVID-19 vaccination trends and investigates the statistical relationship between national vaccination strategies and excess mortality during the pandemic. Utilizing datasets from Our World in Data and the World Health Organization (WHO), this analysis employs various data science techniques, including **Exploratory Data Analysis (EDA)**, **Regression Modeling**, **Classification**, **Clustering**, and **Neural Networks**.
+This project provides a comprehensive analysis of global COVID-19 vaccination trends and investigates the statistical relationship between national vaccination strategies and excess mortality during the pandemic. Utilizing datasets from Our World in Data and the World Health Organization (WHO), this analysis employs various data science techniques, including:
+
+* **Exploratory Data Analysis (EDA)**
+* **Regression Modeling** (Simple & Multiple with Backward Elimination)
+* **Supervised Classification** (Logistic Regression, SVM, KNN, Neural Network, & XGBoost)
+* **Unsupervised Learning** (K-Means Clustering)
+* **Deep Learning** (MLP for Time-Series Forecasting)
 
 The primary objectives were:
 1.  To understand patterns in global vaccination coverage, speed, and disparities.
@@ -115,29 +121,7 @@ This section details each analysis performed, referencing the corresponding visu
 
 ---
 
-### Classification (Predicting Vaccination Success)
-
-* **Reasoning:** To determine if a country's vaccination *strategy* (pace, boosters, duration) could predict whether it achieved a "High" vaccination level (defined as >= 60% fully vaccinated by end of 2021).
-* **Method:**
-    * Created a binary target variable `vaccination_level` (1=High, 0=Low).
-    * Engineered features: `total_boosters_per_hundred`, `daily_vaccinations_per_million`, `campaign_duration_days`.
-    * Used **Recursive Feature Elimination (RFE)** to select the best 2 predictors.
-    * Trained a **Logistic Regression** model on the selected features after scaling.
-* **Visualization:** ![classification_confusion_matrix.png](visualization/classification_confusion_matrix.png): Heatmap showing the model's prediction accuracy (True Positives, True Negatives, False Positives, False Negatives).
-* **Findings:** The model achieved high accuracy (>90%). RFE identified `total_boosters_per_hundred` and `campaign_duration_days` as the most predictive features. The confusion matrix showed the model was effective at identifying both High and Low-level countries, confirming that strategic elements are predictive of success.
-
----
-
-### Neural Network (Advanced Classification)
-
-* **Reasoning:** To explore if a more complex, non-linear model could improve upon the Logistic Regression classification or capture more intricate patterns.
-* **Method:** Trained a **Multi-layer Perceptron (MLPClassifier)** from `scikit-learn` (after encountering TensorFlow installation issues) on the same features and target as the Logistic Regression model. Used scaled data and early stopping to prevent overfitting.
-* **Visualization:** ![neural_network_loss_curve.png](visualization/neural_network_loss_curve.png): Line chart showing the model's training loss decreasing over epochs.
-* **Findings:** The neural network achieved similar high accuracy to the Logistic Regression model. The smooth decrease in the loss curve indicated successful training. This suggests that the relationship between the chosen strategic features and the High/Low outcome, while potentially complex, was largely captured even by the linear model in this case.
-
----
-
-### Clustering (Discovering Country Groups)
+### Clustering (Discovering Country Groups using K-Means)
 
 * **Reasoning:** To apply unsupervised learning (K-Means) to identify natural groupings among countries based purely on their end-of-2021 vaccination performance metrics, without predefined labels.
 * **Method:**
@@ -152,6 +136,69 @@ This section details each analysis performed, referencing the corresponding visu
     1.  **"High Achievers":** High full vaccination and booster rates, moderate/low pace (mature campaigns).
     2.  **"Active Campaigns":** Moderate coverage, but very high daily pace (actively rolling out).
     3.  **"Lagging Nations":** Low coverage, low boosters, low pace (early stage or stalled campaigns).
+
+---
+
+### Classification - Logistic Regression
+
+* **Reasoning:** To determine if a country's vaccination *strategy* (pace, boosters, duration) could predict whether it achieved a "High" vaccination level (defined as >= 60% fully vaccinated by end of 2021).
+* **Method:**
+    * Created a binary target variable `vaccination_level` (1=High, 0=Low).
+    * Engineered features: `total_boosters_per_hundred`, `daily_vaccinations_per_million`, `campaign_duration_days`.
+    * Used **Recursive Feature Elimination (RFE)** to select the best 2 predictors.
+    * Trained a **Logistic Regression** model on the selected features after scaling.
+* **Visualization:** ![classification_confusion_matrix.png](visualization/classification_confusion_matrix.png): Heatmap showing the model's prediction accuracy (True Positives, True Negatives, False Positives, False Negatives).
+* **Findings:** The model achieved high accuracy (>90%). RFE identified `total_boosters_per_hundred` and `campaign_duration_days` as the most predictive features. The confusion matrix showed the model was effective at identifying both High and Low-level countries, confirming that strategic elements are predictive of success.
+
+---
+
+### Classification - Neural Network (MLP)
+
+* **Reasoning:** To explore if a more complex, non-linear model could improve upon the Logistic Regression classification or capture more intricate patterns.
+* **Method:** Trained a **Multi-layer Perceptron (MLPClassifier)** from `scikit-learn` on the same features and target as the Logistic Regression model. Used scaled data and early stopping to prevent overfitting.
+* **Visualization:** ![neural_network_loss_curve.png](visualization/neural_network_loss_curve.png): Line chart showing the model's training loss decreasing over epochs.
+* **Findings:** The neural network achieved similar high accuracy to the Logistic Regression model. The smooth decrease in the loss curve indicated successful training. This suggests that the relationship between the chosen strategic features and the High/Low outcome, while potentially complex, was largely captured even by the linear model.
+
+---
+
+### Classification - Support Vector Machine (SVM)
+
+* **Reasoning:** To apply a different class of model. SVMs work by finding an optimal "hyperplane" (decision boundary) to separate the classes. The `RBF` kernel is excellent at capturing complex, non-linear relationships.
+* **Method:** Trained an `SVC` (Support Vector Classifier) with an RBF kernel on the scaled features.
+* **Visualization:** `visualization/svm_confusion_matrix.png`: A confusion matrix showing the SVM's performance.
+* **Findings:** The SVM also achieved very high accuracy, reinforcing the conclusion that the "High" and "Low" groups are clearly separable in the feature space.
+
+---
+
+### Classification - K-Nearest Neighbors (KNN)
+
+* **Reasoning:** To use a distance-based, non-parametric model. KNN classifies a country by looking at the "k" other countries that are most similar to it.
+* **Method:** Trained a `KNeighborsClassifier` (with k=7) on the scaled features.
+* **Visualization:** `visualization/knn_confusion_matrix.png`: A confusion matrix showing the KNN's performance.
+* **Findings:** The high accuracy of the KNN model confirms that countries within the same success-level (High/Low) share very similar, measurable strategic characteristics.
+
+---
+
+### Classification - XGBoost
+
+* **Reasoning:** To use a powerful, tree-based ensemble model (Extreme Gradient Boosting), which is often a top performer and can provide direct feature importance.
+* **Method:** Trained an `XGBClassifier` on the *unscaled* features (as tree models don't require scaling).
+* **Visualizations:**
+    * ![xgboost_confusion_matrix.png](visualization/xgboost_confusion_matrix.png): Confusion matrix showing XGBoost's high accuracy.
+    * ![xgboost_feature_importance.png](visualization/xgboost_feature_importance.png): A bar chart ranking the features by their predictive power.
+* **Findings:** XGBoost was a top-performing model. The **Feature Importance** plot provided the most valuable insight: **`total_boosters_per_hundred`** was the *most important* feature for predicting success, followed by `campaign_duration_days`. This gives a clear, actionable answer about what strategies were most effective.
+
+---
+
+### Deep Learning (Time-Series Forecasting)
+
+* **Reasoning:** To apply a deep learning model (MLPRegressor) to forecast future vaccination pace, demonstrating a different application of neural networks.
+* **Method:**
+    * Focused on a single country with consistent data (Germany).
+    * Created a supervised learning problem using a "look-back" window: used the previous 30 days of `daily_vaccinations_per_million` to predict the 31st day.
+    * Scaled data using `MinMaxScaler` and trained an `MLPRegressor`.
+* **Visualization:** `visualization/dl_forecasting_plot.png`: Line chart plotting the model's training and testing predictions against the actual historical data.
+* **Findings:** The model's predictions (green line) closely tracked the actual data (blue line), even on the unseen test set. This proves that a country's vaccination pace is not random and that deep learning models can effectively learn the complex time-series patterns (surges, lulls) to make accurate forecasts, which is valuable for resource planning.
 
 ---
 
@@ -176,8 +223,12 @@ This section details each analysis performed, referencing the corresponding visu
 ## 5. Tools & Technologies Used
 
 * **Programming Language:** Python
-* **Core Libraries:** `pandas`, `numpy`, `matplotlib`, `seaborn`, `altair`, `statsmodels`, `scikit-learn`
+* **Core Libraries:** `pandas`, `numpy`, `matplotlib`, `seaborn`, `altair`
+* **Statistical Modeling:** `statsmodels` (OLS Regression)
+* **Machine Learning:** `scikit-learn` (LinearRegression, LogisticRegression, MLPClassifier, MLPRegressor, SVC, KNeighborsClassifier, StandardScaler, MinMaxScaler, RFE, K-Means)
+* **Ensemble Modeling:** `xgboost` (XGBClassifier)
 * **Dashboarding:** `streamlit`
+* **File Handling:** `openpyxl` (for reading `.xlsx` files)
 * **Environment:** Jupyter Notebook
 
 ---
@@ -194,7 +245,7 @@ This section details each analysis performed, referencing the corresponding visu
     pip install -r requirements.txt
     # Or manually: pip install streamlit pandas numpy statsmodels scikit-learn matplotlib seaborn altair openpyxl
     ```
-3.  **Ensure Data Files are Present:** Make sure the CSV files (`vaccinations.csv`, `WHO...age.csv`, `vaccinations_cleaned.csv`) are in the same directory as `dashboard.py`.
+3.  **Ensure Data Files are Present:** Make sure the data files (`vaccinations.csv`, `WHO_COVID_Excess_Deaths_Estimates_By_Countries.xlsx`, `vaccinations_cleaned.csv`) are in the same directory as `dashboard.py`.
 4.  **Ensure Visualization Folder is Present:** Confirm the `visualization/` folder exists and contains all the `.png` graph files.
 5.  **Run the App:**
     ```bash
