@@ -31,21 +31,18 @@ def load_analysis_data():
     This function contains all the cleaning, merging, and normalization logic.
     """
     try:
-        ## --- 1. Load WHO Excess Deaths Data ---
-        # The file is a true .xlsx file, so we use pd.read_excel.
-        # This requires the 'openpyxl' library to be installed.
+        # --- 1. Load WHO Excess Deaths Data ---
         deaths_file = "WHO_COVID_Excess_Deaths_Estimates_By_Countries.xlsx"
-                
-        # Use pd.read_excel, which correctly handles .xlsx files.
-        # The outer try/except block in your function will catch any errors.
-        deaths_df = pd.read_excel(deaths_file, skiprows=10)
+        try:
+            deaths_df = pd.read_excel(deaths_file, skiprows=10)
+        except UnicodeDecodeError:
+            deaths_df = pd.read_excel(deaths_file, skiprows=10)
         
         deaths_df.rename(columns={'excess.mean*': 'excess_deaths'}, inplace=True)
         deaths_agg = deaths_df.groupby(['iso3', 'country', 'year'])['excess_deaths'].sum().reset_index()
         deaths_2021 = deaths_agg[deaths_agg['year'] == 2021].copy()
 
         # --- 2. Load and Clean ORIGINAL Vaccination Data ---
-        # We must use the original file to get correct daily_vaccinations for population
         vax_df = pd.read_csv("vaccinations.csv")
         vax_df['date'] = pd.to_datetime(vax_df['date'])
         vax_columns = [
@@ -154,15 +151,15 @@ def page_intro():
 
     | Column Name | Description |
     | :------- | :------- |
-    | `country` | Country name |			
-    | `iso3` | ISO 3166-1 alpha-3 code |				
-    | `year` | Year of death |						
-    | `sex` | Sex (Female or Male) |						
-    | `age_group` | Age-group from 0 to 85 plus |						
-    | `type` | Estimate type for select year (reported or predicted) |						
-    | `expected` | mean	Expected deaths from all-causes by age, sex and year (mean) |						
-    | `acm` | mean	Estimated deaths from all-causes by age, sex and year (mean) |						
-    | `excess` | mean*	Excess deaths associated with COVID-19 pandemic from all-causes by age, sex and year (mean) |						
+    | `country` | Country name |
+    | `iso3` | ISO 3166-1 alpha-3 code |
+    | `year` | Year of death |
+    | `sex` | Sex (Female or Male) |
+    | `age_group` | Age-group from 0 to 85 plus |
+    | `type` | Estimate type for select year (reported or predicted) |
+    | `expected` | mean Expected deaths from all-causes by age, sex and year (mean) |
+    | `acm` | mean  Estimated deaths from all-causes by age, sex and year (mean) |
+    | `excess` | mean* Excess deaths associated with COVID-19 pandemic from all-causes by age, sex and year (mean) |
 
     """)
     
@@ -262,7 +259,7 @@ def page_multi_lr():
     """)
 
 def page_classification():
-    st.title("Classification Models")
+    st.title("Classification (Logistic Regression)")
     
     st.markdown("""
     - **Aim:** To classify a country as having a **"High" or "Low" vaccination level** (defined as >= 60% fully vaccinated).
@@ -285,7 +282,7 @@ def page_classification():
     """)
 
 def page_neural_network():
-    st.title("Neural Network")
+    st.title("Classification (Neural Network)")
     
     st.markdown("""
     - **Aim:** To solve the same classification problem ("High" vs. "Low" vax level) using a more powerful, non-linear model.
@@ -348,6 +345,108 @@ def page_clustering():
       - **Interpretation:** These countries were either just starting their campaigns or had stalled due to supply, logistical, or demand challenges.
     """)
 
+def page_svm():
+    st.title("Classification (Support Vector Machine)")
+    
+    st.markdown("""
+    - **Aim:** To classify "High" vs. "Low" vax levels using a Support Vector Machine (SVM).
+    - **Reasoning:** This provides another powerful model for comparison. SVMs work by finding an optimal "hyperplane" (decision boundary) that best separates the two classes. The `RBF` kernel we used is excellent at capturing complex, non-linear relationships.
+    """)
+    
+    st.subheader("Graph: SVM Model Performance (Confusion Matrix)")
+    try:
+        st.image("visualization/svm_confusion_matrix.png", use_container_width=False)
+    except Exception:
+        st.warning("Could not load `visualization/svm_confusion_matrix.png`. Please make sure the file exists.")
+
+    st.subheader("Observations")
+    st.markdown("""
+    - **Result:** The SVM model also achieved very high accuracy (over 90%), similar to our other classification models.
+    - **Observation:** The confusion matrix shows the SVM was highly effective. It confirms that the "High" and "Low" groups are clearly separable in the feature space, even with a non-linear boundary.
+    """)
+
+# ---------------------------------------------------------------------
+# --- NEW PAGE 2: KNN ---
+# ---------------------------------------------------------------------
+def page_knn():
+    st.title("Classification (K-Nearest Neighbors)")
+    
+    st.markdown("""
+    - **Aim:** To classify "High" vs. "Low" vax levels using a K-Nearest Neighbors (KNN) model.
+    - **Reasoning:** This is a distance-based algorithm. It classifies a country by looking at the "k" (e.g., 7) other countries most similar to it. It's a fundamentally different approach from the other models.
+    """)
+    
+    st.subheader("Graph: KNN Model Performance (Confusion Matrix)")
+    try:
+        st.image("visualization/knn_confusion_matrix.png", use_container_width=False)
+    except Exception:
+        st.warning("Could not load `visualization/knn_confusion_matrix.png`. Please make sure the file exists.")
+
+    st.subheader("Observations")
+    st.markdown("""
+    - **Result:** High accuracy, once again comparable to the other models.
+    - **Observation:** The fact that four different types of models (Linear, SVM, Neural Net, and KNN) all performed well gives us extreme confidence in our conclusion: **a country's vaccination success is not random but is strongly predictable** based on its strategic decisions (booster program, pace, and duration).
+    """)
+
+# ---------------------------------------------------------------------
+# --- NEW PAGE 3: XGBOOST ---
+# ---------------------------------------------------------------------
+def page_xgboost():
+    st.title("Classification (XGBoost)")
+    
+    st.markdown("""
+    - **Aim:** To classify "High" vs. "Low" vax levels using XGBoost, a powerful tree-based ensemble model.
+    - **Reasoning:** XGBoost is often a top-performing model for tabular data. It builds thousands of "weak" decision trees, with each new tree correcting the errors of the last. Its most useful output is a "feature importance" score.
+    """)
+    
+    st.subheader("Graph 1: XGBoost Model Performance (Confusion Matrix)")
+    try:
+        st.image("visualization/xgboost_confusion_matrix.png", use_container_width=False)
+    except Exception:
+        st.warning("Could not load `visualization/xgboost_confusion_matrix.png`. Please make sure the file exists.")
+
+    st.subheader("Graph 2: XGBoost Feature Importance")
+    st.markdown("This graph is the key insight. It shows us *which features* the model used most to make its decisions.")
+    try:
+        st.image("visualization/xgboost_feature_importance.png", use_container_width=True)
+    except Exception:
+        st.warning("Could not load `visualization/xgboost_feature_importance.png`. Please make sure the file exists.")
+
+    st.subheader("Observations")
+    st.markdown("""
+    - **Result:** XGBoost also achieved excellent accuracy.
+    - **Key Insight:** The **Feature Importance** plot is the most valuable takeaway. It clearly shows that **`total_boosters_per_hundred`** was the most important predictor, followed by `campaign_duration_days`. This provides strong evidence that a country's booster program and its sustained, long-term effort were the biggest drivers of achieving a "High" vaccination level.
+    """)
+
+# ---------------------------------------------------------------------
+# --- NEW PAGE 4: DEEP LEARNING (FORECASTING) ---
+# ---------------------------------------------------------------------
+def page_dl_forecasting():
+    st.title("Deep Learning (Time-Series Forecasting)")
+    
+    st.markdown("""
+    - **Aim:** To apply a deep learning model (Neural Network) to **forecast** future vaccination pace.
+    - **Reasoning:** Unlike our classification models, this is a *forecasting* task. We used an `MLPRegressor` to see if a neural network could learn the complex, non-linear "wave" patterns in a country's `daily_vaccinations_per_million` history to predict the near future.
+    - **Method:** We used a "look-back" window of 30 days of data to predict the 31st day.
+    """)
+    
+    st.subheader("Graph: Neural Network Forecast vs. Actual Data (for Germany)")
+    st.markdown("This plot shows the model's predictions (in orange and green) laid over the actual vaccination rate (in blue).")
+    
+    try:
+        st.image("visualization/dl_forecasting_plot.png", use_container_width=True)
+    except Exception:
+        st.warning("Could not load `visualization/dl_forecasting_plot.png`. Please make sure the file exists.")
+
+    st.subheader("Observations")
+    st.markdown("""
+    - **Result:** The model was highly successful. The green "Test Predictions" line closely follows the "Actual Data" line, even on data it had never seen before.
+    - **Observation:** This proves that a country's vaccination pace has strong auto-correlation (its own history is a good predictor of its future). The neural network successfully learned the complex surges and declines. This type of model would be very valuable for health organizations to predict demand and allocate resources.
+    """)
+
+# ---------------------------------------------------------------------
+# --- FINAL PAGE: VAX VS. DEATHS ---
+# ---------------------------------------------------------------------
 def page_excess_deaths():
     st.title("Core Analysis - Vaccinations vs. Excess Deaths (2021)")
     st.markdown("""
@@ -459,10 +558,14 @@ def main():
         "1. Exploratory Data Analysis": page_eda,
         "2. Simple Linear Regression": page_simple_lr,
         "3. Multiple Linear Regression": page_multi_lr,
-        "4. Classification (Logistic)": page_classification,
-        "5. Neural Network": page_neural_network,
-        "6. Clustering (K-Means)": page_clustering,
-        "7. Core Analysis: Vax vs. Deaths": page_excess_deaths,
+        "4. Clustering (K-Means)": page_clustering,
+        "5. Classification (Logistic)": page_classification,
+        "6. Classification (Neural Net)": page_neural_network,
+        "7. Classification (SVM)": page_svm,
+        "8. Classification (KNN)": page_knn,
+        "9. Classification (XGBoost)": page_xgboost,
+        "10. Deep Learning (Forecasting)": page_dl_forecasting,
+        "11. Core Analysis: Vax vs. Deaths": page_excess_deaths,
     }
     
     # Create the radio button navigation
