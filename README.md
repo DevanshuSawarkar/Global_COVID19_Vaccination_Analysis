@@ -2,6 +2,7 @@
 
 - Author: Devanshu Sawarkar
 - Github Link: [https://github.com/DevanshuSawarkar/Global_COVID19_Vaccination_Analysis](https://github.com/DevanshuSawarkar/Global_COVID19_Vaccination_Analysis)
+- Streamlit Deployed App: [https://devanshusawarkar-global-covid19-vaccination-analysis.streamlit.app/](https://devanshusawarkar-global-covid19-vaccination-analysis.streamlit.app/) 
 
 ---
 
